@@ -12,7 +12,18 @@ func TestGetDirSuccess(t *testing.T) {
     dirname, _ := os.Getwd()
     d, err := filetree.GetDir(dirname)
     CheckDirError(t, dirname, err)
-    f, err := os.OpenFile(dirname, os.O_RDONLY, os.ModeDir)
+    DirSuccessAsserts(dirname, d, t)
+}
+
+func TestGetDirSuccessWithSuffix(t *testing.T) {
+    dirname, _ := os.Getwd()    
+    d, err := filetree.GetDir(dirname)
+    CheckDirError(t, dirname + "/", err)
+    DirSuccessAsserts(dirname, d, t)
+}
+
+func DirSuccessAsserts(dirname string, d *filetree.Dir, t *testing.T) {
+    f, _ := os.OpenFile(dirname, os.O_RDONLY, os.ModeDir)
     defer f.Close()
     expInfo, _ := f.Stat()
     if expInfo.Name() != d.Info.Name() {

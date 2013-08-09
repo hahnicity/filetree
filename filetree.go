@@ -4,6 +4,7 @@ import (
     "errors"
     "path"
     "os"
+    "strings"
 )
 
 type Dir struct {
@@ -13,6 +14,9 @@ type Dir struct {
 
 func GetDir(dirname string) (*Dir, error) {
     /*Get a directory object*/
+    if strings.HasSuffix(dirname, "/") {
+        dirname = dirname[:len(dirname)-1]    
+    }
     f, err := os.OpenFile(dirname, os.O_RDONLY, os.ModeDir)
     if errorCheck(err) {
         return nil, err    
@@ -42,7 +46,12 @@ func (d *Dir) GetFilePaths() ([]string, error) {
     defer f.Close()
     for _, i := range files {
         if !i.IsDir() {
-            allPaths = append(allPaths, path.Join(d.Path, i.Name()))    
+            allPaths = append(
+                allPaths,
+                // XXX There is something really weird going on here with how
+                // directory paths are analyzed. Look into this
+                path.Join(path.Join(d.Path, d.Info.Name()), i.Name()),
+            )    
         }
     }
     return allPaths, nil
